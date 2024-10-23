@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scanbarcode/features/scanbarcode/presentation/controller/product_cubit.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class InventoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Fetch products when the InventoryScreen is built
+    context.read<ProductCubit>().fetchProducts();
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Inventory"),
@@ -17,8 +22,9 @@ class InventoryScreen extends StatelessWidget {
       ),
       body: BlocBuilder<ProductCubit, List<Map<String, dynamic>>>(
         builder: (context, products) {
+          // Show loading indicator if data is being fetched
           if (products.isEmpty) {
-            return Center(child: Text("No products added"));
+            return Center(child: CircularProgressIndicator());
           }
 
           return ListView.builder(

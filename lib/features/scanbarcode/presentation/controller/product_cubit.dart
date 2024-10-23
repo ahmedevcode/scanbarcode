@@ -29,15 +29,16 @@ class ProductCubit extends Cubit<List<Map<String, dynamic>>> {
   }
 
   Future<void> exportToExcel() async {
-    var excel = Excel.createExcel();
-    Sheet sheet = excel['Inventory'];
+    // Create a new Excel file
+    var excel = Excel.createExcel(); // This creates a new Excel document
+    Sheet sheet = excel['Inventory']; // Create a new sheet named 'Inventory'
 
-    // Append headers as dynamic types
+    // Append headers
     sheet.appendRow([
-      // 'Barcode',         // String
-      // 'Quantity',        // String or int
-      // 'Expiration Date', // String or DateTime
-      // 'Warehouse'        // String
+      // 'barcode',         // Header for barcode
+      // 'Quantity',        // Header for quantity
+      // 'Expiration Date', // Header for expiration date
+      // 'Warehouse',       // Header for warehouse
     ]);
 
     // Append each product row
@@ -45,18 +46,24 @@ class ProductCubit extends Cubit<List<Map<String, dynamic>>> {
       sheet.appendRow([
         product['barcode'], // Assuming this is a string
         product['quantity'], // Assuming this is an integer
-        product['expirationDate'], // Assuming this is a string or DateTime
+        product['expirationDate'], // Assuming this is an ISO formatted string
         product['warehouse'], // Assuming this is a string
       ]);
     }
 
     // Save to file
-    final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/inventory.xlsx';
-    File(path)
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(excel.encode()!);
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final path = '${directory.path}/inventory.xlsx';
+      File file = File(path);
 
-    print('Exported to $path');
+      // Create the file if it does not exist and write the Excel data
+      await file.create(recursive: true);
+      await file.writeAsBytes(await excel.encode()!);
+
+      print('Exported to $path');
+    } catch (e) {
+      print('Failed to export to Excel: $e');
+    }
   }
 }
