@@ -1,18 +1,19 @@
 buildscript {
-    ext.kotlin_version = '1.9.0'
+    ext.kotlin_version = '2.0.21'
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.2'
-        // START: FlutterFire Configuration
-        classpath 'com.google.gms:google-services:4.3.10'
-        // END: FlutterFire Configuration
+        // Upgrade Android Gradle Plugin to a newer version
+        classpath 'com.android.tools.build:gradle:8.1.4'
+
+        // Upgrade google-services to the latest version
+        classpath 'com.google.gms:google-services:4.4.2'
+
+        // Kotlin Gradle plugin for version 1.9.0
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-            implementation 'com.google.firebase:firebase-analytics:latest_version'
-    implementation 'com.google.firebase:firebase-firestore:latest_version'
     }
 }
 
@@ -22,12 +23,23 @@ allprojects {
         mavenCentral()
     }
 }
-
+ext {
+    compileSdkVersion=34
+    targetSdkVersion=34
+    appCompatVersion="1.7.0"
+}
+// Set up build directories
 rootProject.buildDir = '../build'
 subprojects {
     buildDir = "${rootProject.buildDir}/${project.name}"
 }
 
+// Clean task
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
+}
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.core:core-ktx:1.6.0'
+    }
 }

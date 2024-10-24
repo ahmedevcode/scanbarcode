@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:scanbarcode/features/scanbarcode/presentation/controller/product_cubit.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For formatting the date
+import 'package:flutter_bloc/flutter_bloc.dart'; // Assuming you use Bloc for ProductCubit
 
 class ProductScanningScreen extends StatefulWidget {
   @override
@@ -15,14 +18,43 @@ class _ProductScanningScreenState extends State<ProductScanningScreen> {
   DateTime _expirationDate = DateTime.now();
   String _warehouse = '';
 
+  // New scanning function using mobile_scanner
   Future<void> _scanBarcode() async {
-    String barcode = await FlutterBarcodeScanner.scanBarcode(
-        "#ff6666", "Cancel", true, ScanMode.BARCODE);
-    if (barcode != "-1") {
-      setState(() {
-        _barcode = barcode;
-      });
-    }
+    final MobileScannerController cameraController = MobileScannerController();
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Scan Barcode'),
+          content: Container(
+            height: 300,
+            child: MobileScanner(
+              controller: cameraController,
+              onDetect: (barcodeCapture) {
+                final barcode = barcodeCapture.barcodes.first;
+                if (barcode.rawValue != null) {
+                  setState(() {
+                    _barcode = barcode.rawValue!;
+                  });
+                  Navigator.of(context).pop(); // Close the scanner once a barcode is detected
+                }
+              },
+
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                cameraController.stop();
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _pickExpirationDate() async {
