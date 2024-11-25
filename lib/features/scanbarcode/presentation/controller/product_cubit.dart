@@ -4,6 +4,11 @@ import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart'; // For Workbook
+import 'package:syncfusion_flutter_xlsio/xlsio.dart'; // For Workbook
+import 'package:path_provider/path_provider.dart'; // For accessing directories
+import 'dart:io'; // For file operations
+import 'package:share_plus/share_plus.dart';
 
 class ProductCubit extends Cubit<List<Map<String, dynamic>>> {
   ProductCubit() : super([]);
@@ -29,41 +34,47 @@ class ProductCubit extends Cubit<List<Map<String, dynamic>>> {
   }
 
   Future<void> exportToExcel() async {
-    // Create a new Excel file
-    var excel = Excel.createExcel(); // This creates a new Excel document
-    Sheet sheet = excel['Inventory']; // Create a new sheet named 'Inventory'
-
-    // Append headers
-    sheet.appendRow([
-      // 'barcode',         // Header for barcode
-      // 'Quantity',        // Header for quantity
-      // 'Expiration Date', // Header for expiration date
-      // 'Warehouse',       // Header for warehouse
-    ]);
-
-    // Append each product row
-    for (var product in state) {
-      sheet.appendRow([
-        product['barcode'], // Assuming this is a string
-        product['quantity'], // Assuming this is an integer
-        product['expirationDate'], // Assuming this is an ISO formatted string
-        product['warehouse'], // Assuming this is a string
-      ]);
-    }
-
-    // Save to file
     try {
+      // Create an Excel workbook
+      final Workbook workbook = Workbook();
+      final Worksheet sheet = workbook.worksheets[0];
+      sheet.name = 'Inventory';
+
+      // Add headers
+      sheet.getRangeByName('A1').setText('Barcode');
+      sheet.getRangeByName('B1').setText('Quantity');
+      sheet.getRangeByName('C1').setText('Expiration Date');
+      sheet.getRangeByName('D1').setText('Warehouse');
+
+      // Add data rows
+      for (int i = 0; i < state.length; i++) {
+        final product = state[i];
+        sheet.getRangeByName('A${i + 2}').setText(product['barcode']);
+        sheet
+            .getRangeByName('B${i + 2}')
+            .setNumber(product['quantity']?.toDouble() ?? 0.0);
+        sheet.getRangeByName('C${i + 2}').setText(product['expirationDate']);
+        sheet.getRangeByName('D${i + 2}').setText(product['warehouse']);
+      }
+
+      // Save the workbook to a file
+      final List<int> bytes = workbook.saveAsStream();
+      workbook.dispose();
+
       final directory = await getApplicationDocumentsDirectory();
-      final path = '${directory.path}/inventory.xlsx';
-      File file = File(path);
+      final filePath = '${directory.path}/inventory.xlsx';
+      final file = File(filePath);
+      await file.writeAsBytes(bytes);
 
-      // Create the file if it does not exist and write the Excel data
-      await file.create(recursive: true);
-      await file.writeAsBytes(await excel.encode()!);
+      // Convert the file path to an XFile
+      final XFile xfile = XFile(filePath);
 
-      print('Exported to $path');
+      // Share the file
+      await Share.shareXFiles([xfile], text: 'Inventory exported to Excel.');
+
+      print('Excel file exported and shared successfully.');
     } catch (e) {
-      print('Failed to export to Excel: $e');
+      print('Error exporting or sharing Excel file: $e');
     }
   }
 }
