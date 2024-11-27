@@ -33,6 +33,32 @@ class ProductCubit extends Cubit<List<Map<String, dynamic>>> {
     emit(products.docs.map((doc) => doc.data()).toList());
   }
 
+  // Delete a single product from Firestore and update state
+  void deleteProduct(String productId, int index) async {
+    await FirebaseFirestore.instance
+        .collection('inventory')
+        .doc(productId)
+        .delete();
+
+    List<Map<String, dynamic>> updatedProducts = List.from(state);
+    updatedProducts.removeAt(index);
+    emit(updatedProducts);
+  }
+
+  // Delete all products from Firestore and update state
+  void deleteAllProducts() async {
+    final batch = FirebaseFirestore.instance.batch();
+    final querySnapshot =
+        await FirebaseFirestore.instance.collection('inventory').get();
+
+    for (var doc in querySnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    await batch.commit();
+    emit([]);
+  }
+
   Future<void> exportToExcel() async {
     try {
       // Create an Excel workbook
