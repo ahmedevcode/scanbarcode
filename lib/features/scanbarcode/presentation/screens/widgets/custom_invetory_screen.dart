@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scanbarcode/features/scanbarcode/presentation/controller/product_cubit.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class InventoryScreen extends StatelessWidget {
+  const InventoryScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     // Fetch products when the InventoryScreen is built
@@ -37,12 +38,14 @@ class InventoryScreen extends StatelessWidget {
               return ListTile(
                 title: Text('Barcode: ${product['barcode']}'),
                 subtitle: Text(
-                    'Quantity: ${product['quantity']}, Expiry: ${product['expirationDate']}'),
+                    'Quantity: ${product['quantity']}, currentDate: ${product['currentDate']}'),
                 trailing: PopupMenuButton(
                   onSelected: (value) {
                     if (value == 'delete') {
-                      _showDeleteConfirmation(
-                          context, product['barcode'], index);
+                      if (kDebugMode) {
+                        print('Delete action triggered');
+                      } // Debug print
+                      _showDeleteConfirmation(context, product['id'], index);
                     }
                   },
                   itemBuilder: (context) => [
@@ -82,16 +85,17 @@ class InventoryScreen extends StatelessWidget {
     bool confirm = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text("Confirm Delete"),
-            content: Text("Are you sure you want to delete this product?"),
+            title: const Text("Confirm Delete"),
+            content:
+                const Text("Are you sure you want to delete this product?"),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text("No"),
+                child: const Text("No"),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text("Yes"),
+                child: const Text("Yes"),
               ),
             ],
           ),
@@ -120,11 +124,11 @@ class InventoryScreen extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text("No"),
+                child: const Text("No"),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text("Yes"),
+                child: const Text("Yes"),
               ),
             ],
           ),

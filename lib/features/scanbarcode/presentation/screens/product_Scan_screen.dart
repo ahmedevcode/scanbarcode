@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:scanbarcode/features/scanbarcode/presentation/controller/product_cubit.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // For formatting the date
-import 'package:flutter_bloc/flutter_bloc.dart'; // Assuming you use Bloc for ProductCubit
 
 class ProductScanningScreen extends StatefulWidget {
+  const ProductScanningScreen({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _ProductScanningScreenState createState() => _ProductScanningScreenState();
 }
 
@@ -26,9 +27,9 @@ class _ProductScanningScreenState extends State<ProductScanningScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Scan Barcode'),
-          content: Container(
-            height: 300,
+          title: const Text('Scan Barcode'),
+          content: SizedBox(
+            height: 300.h,
             child: MobileScanner(
               controller: cameraController,
               onDetect: (barcodeCapture) {
@@ -37,10 +38,10 @@ class _ProductScanningScreenState extends State<ProductScanningScreen> {
                   setState(() {
                     _barcode = barcode.rawValue!;
                   });
-                  Navigator.of(context).pop(); // Close the scanner once a barcode is detected
+                  Navigator.of(context)
+                      .pop(); // Close the scanner once a barcode is detected
                 }
               },
-
             ),
           ),
           actions: [
@@ -49,7 +50,7 @@ class _ProductScanningScreenState extends State<ProductScanningScreen> {
                 cameraController.stop();
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
           ],
         );
@@ -76,7 +77,7 @@ class _ProductScanningScreenState extends State<ProductScanningScreen> {
       context
           .read<ProductCubit>()
           .addProduct(_barcode, _quantity, _expirationDate, _warehouse);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Product added successfully!'),
       ));
     }
@@ -85,36 +86,35 @@ class _ProductScanningScreenState extends State<ProductScanningScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Scan Product")),
+      appBar: AppBar(title: const Text("Scan Product")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             ElevatedButton(
               onPressed: _scanBarcode,
-              child: Text('Scan Barcode'),
+              child: const Text('Scan Barcode'),
             ),
             if (_barcode.isNotEmpty) Text('Scanned Barcode: $_barcode'),
             TextField(
-              decoration: InputDecoration(labelText: 'Warehouse Name'),
+              decoration: const InputDecoration(labelText: 'Warehouse Name'),
               onChanged: (value) => _warehouse = value,
             ),
             TextField(
-              decoration: InputDecoration(labelText: 'Quantity'),
+              decoration: const InputDecoration(labelText: 'Quantity'),
               keyboardType: TextInputType.number,
               onChanged: (value) => _quantity = int.tryParse(value) ?? 1,
             ),
             ElevatedButton(
               onPressed: _pickExpirationDate,
-              child: Text('Pick Expiration Date'),
+              child: const Text('Pick  Date'),
             ),
-            if (_expirationDate != null)
-              Text(
-                  'Selected Expiration Date: ${DateFormat('yyyy-MM-dd').format(_expirationDate)}'),
-            SizedBox(height: 20),
+            Text(
+                'Selected  Date: ${DateFormat('yyyy-MM-dd').format(_expirationDate)}'),
+            SizedBox(height: 20.h),
             ElevatedButton(
               onPressed: _addProduct,
-              child: Text('Add Product'),
+              child: const Text('Add Product'),
             ),
           ],
         ),
